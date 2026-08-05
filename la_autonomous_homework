@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Código de Python — Noah Leon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14161a;
+    --bg-soft: #1c1f24;
+    --slime: #4dff7f;
+    --slime-dark: #17a44a;
+    --slime-glow: rgba(77,255,127,0.45);
+    --ink: #eef4ee;
+    --ink-dim: #a9b3ad;
+    --card-border: rgba(77,255,127,0.18);
+    --kw: #4dff7f;
+    --str: #ffd166;
+    --com: #6b756e;
+    --fn: #7fd4ff;
+    --num: #ff8fa3;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .grain{
+    position: fixed; inset:0; pointer-events:none; z-index: 1; opacity: .05; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a{ color: inherit; text-decoration: none; }
+  section{ position: relative; z-index: 2; }
+  .wrap{ max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- HERO / TITLE ---------- */
+  .hero{
+    padding: 90px 24px 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .blob-field{ position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+  .blob-field svg{ position:absolute; opacity:.22; filter: blur(30px); }
+  .blob-field svg.b1{ top:-15%; left:-15%; width: 55vw; animation: float1 14s ease-in-out infinite; }
+  .blob-field svg.b2{ bottom:-25%; right:-10%; width: 50vw; animation: float2 17s ease-in-out infinite; }
+
+  @keyframes float1{
+    0%,100%{ transform: translate(0,0) rotate(0deg); }
+    50%{ transform: translate(30px,20px) rotate(8deg); }
+  }
+  @keyframes float2{
+    0%,100%{ transform: translate(0,0) rotate(0deg); }
+    50%{ transform: translate(-25px,-15px) rotate(-6deg); }
+  }
+
+  .eyebrow{
+    position: relative; z-index: 2;
+    font-size: 13px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--slime); font-weight: 500;
+    opacity: 0; animation: rise .7s .1s forwards ease-out;
+  }
+
+  .title{
+    position: relative; z-index: 2;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.6rem, 9vw, 4.6rem);
+    line-height: .98;
+    margin: 10px 0 6px;
+    color: var(--slime);
+    text-shadow: 0 0 30px var(--slime-glow), 0 0 70px rgba(77,255,127,0.25);
+    opacity: 0; animation: rise .8s .25s forwards ease-out;
+  }
+
+  .tagline{
+    position: relative; z-index: 2;
+    color: var(--ink-dim);
+    font-size: clamp(.95rem, 2.2vw, 1.1rem);
+    max-width: 460px;
+    margin: 0 auto;
+    opacity: 0; animation: rise .8s .4s forwards ease-out;
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(18px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  /* ---------- CODE CARD ---------- */
+  .code-section{ padding: 30px 0 100px; }
+
+  .reveal{ opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity: 1; transform: translateY(0); }
+
+  .code-card{
+    background: linear-gradient(160deg, rgba(77,255,127,0.06), rgba(255,255,255,0.02));
+    border: 1px solid var(--card-border);
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 30px 60px -30px rgba(0,0,0,.6);
+  }
+  .code-card::before{
+    content:""; position:absolute; top:-30%; right:-15%; width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle, var(--slime-glow), transparent 70%);
+    filter: blur(14px); pointer-events:none;
+  }
+
+  .code-titlebar{
+    position: relative; z-index: 1;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 22px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .dots{ display:flex; gap: 8px; }
+  .dots i{ width: 12px; height: 12px; border-radius: 50%; display:block; }
+  .dots i:nth-child(1){ background:#ff6159; }
+  .dots i:nth-child(2){ background:#ffbd2e; }
+  .dots i:nth-child(3){ background:#28c941; }
+
+  .filename{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem;
+    color: var(--ink-dim);
+    display:flex; align-items:center; gap: 8px;
+  }
+  .filename svg{ width:15px; height:15px; fill: var(--slime); }
+
+  .copy-btn{
+    appearance:none; border: 1px solid var(--card-border); cursor:pointer;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: .04em;
+    padding: 8px 14px; border-radius: 999px;
+    background: var(--bg); color: var(--ink-dim);
+    display:flex; align-items:center; gap:6px;
+    transition: border-color .25s, color .25s, transform .2s;
+  }
+  .copy-btn svg{ width: 13px; height: 13px; fill: currentColor; }
+  .copy-btn:hover{ border-color: var(--slime); color: var(--slime); }
+  .copy-btn:active{ transform: scale(.95); }
+  .copy-btn.copied{ border-color: var(--slime); color: var(--slime); }
+
+  .code-body{
+    position: relative; z-index: 1;
+    display:flex;
+    max-height: 640px;
+    overflow: auto;
+  }
+  .code-body::-webkit-scrollbar{ width: 10px; height: 10px; }
+  .code-body::-webkit-scrollbar-track{ background: transparent; }
+  .code-body::-webkit-scrollbar-thumb{ background: var(--card-border); border-radius: 10px; }
+  .code-body::-webkit-scrollbar-thumb:hover{ background: var(--slime-dark); }
+
+  .line-numbers{
+    flex: 0 0 auto;
+    text-align: right;
+    padding: 20px 12px 20px 20px;
+    color: #4c5550;
+    user-select: none;
+    background: rgba(0,0,0,.15);
+    border-right: 1px solid var(--card-border);
+  }
+
+  pre{
+    margin: 0; padding: 20px 24px; flex: 1;
+  }
+  code{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .84rem;
+    line-height: 1.7;
+    white-space: pre;
+    color: var(--ink);
+  }
+  .line-numbers, code{ line-height: 1.7; }
+  .line-numbers span, code .ln{ display:block; }
+
+  .tok-kw{ color: var(--kw); font-weight: 600; }
+  .tok-str{ color: var(--str); }
+  .tok-com{ color: var(--com); font-style: italic; }
+  .tok-fn{ color: var(--fn); }
+  .tok-num{ color: var(--num); }
+  .tok-cls{ color: var(--slime); font-weight: 600; }
+
+  .meta-row{
+    position: relative; z-index: 1;
+    display:flex; flex-wrap:wrap; gap: 10px;
+    padding: 16px 22px; background: var(--bg-soft); border-top: 1px solid var(--card-border);
+  }
+  .tag{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--ink-dim);
+    background: var(--bg);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .tag b{ color: var(--slime); font-weight: 700; }
+
+  footer{
+    position: relative; z-index: 2;
+    text-align:center; padding: 40px 0 60px;
+    color: var(--ink-dim); font-size: .85rem;
+  }
+  footer .accent{ color: var(--slime); }
+
+  @media (max-width: 620px){
+    .code-body{ font-size: .78rem; }
+    .line-numbers{ padding: 20px 8px 20px 14px; }
+    pre{ padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<section class="hero">
+  <div class="blob-field">
+    <svg class="b1" viewBox="0 0 200 200"><path fill="#4dff7f" d="M52,-62.7C65.9,-53.3,75.3,-36.6,78.6,-19C81.9,-1.4,79.1,17.1,70.4,32.1C61.7,47.1,47.2,58.6,31,64.6C14.9,70.6,-2.9,71,-19.9,66.3C-36.9,61.5,-53.1,51.5,-63.4,36.9C-73.7,22.3,-78.1,3.1,-74.6,-14.5C-71.1,-32.1,-59.7,-48.1,-45,-57.5C-30.3,-66.9,-15.2,-69.6,1.6,-71.6C18.3,-73.6,38.2,-72,52,-62.7Z" transform="translate(100 100)"/></svg>
+    <svg class="b2" viewBox="0 0 200 200"><path fill="#17a44a" d="M44.7,-54.5C57.6,-45.8,67.4,-31.5,70.9,-15.6C74.5,0.4,71.9,18,63.3,32.1C54.8,46.2,40.3,56.8,24.1,63.1C7.9,69.4,-10,71.5,-25.9,66.4C-41.8,61.3,-55.7,49,-63.8,33.5C-71.8,18,-74,-0.7,-68.7,-16.7C-63.4,-32.7,-50.6,-46,-36.1,-54.5C-21.6,-63,-10.8,-66.6,3.5,-71.3C17.8,-75.9,31.7,-63.2,44.7,-54.5Z" transform="translate(100 100)"/></svg>
+  </div>
+  <p class="eyebrow">Noah Leon</p>
+  <h1 class="title">Código de Python</h1>
+  <p class="tagline">Clases, herencia de comportamiento y objetos que interactúan entre sí.</p>
+</section>
+
+<section class="code-section">
+  <div class="wrap">
+    <div class="code-card reveal">
+      <div class="code-titlebar">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <div class="filename">
+          <svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L4 5v9l8 4V9Zm2 0v9l8-4V5l-8 4Z"/></svg>
+          registro_vehiculos_animales.py
+        </div>
+        <button class="copy-btn" id="copyBtn">
+          <svg viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z"/></svg>
+          <span>Copiar</span>
+        </button>
+      </div>
+
+      <div class="code-body">
+        <div class="line-numbers" id="lineNumbers"></div>
+        <pre><code id="codeBlock"># Codigo por Noah Leon
+<span class="tok-kw">class</span> <span class="tok-cls">Vehiculo</span>:
+    <span class="tok-com"># Atributo de clase</span>
+    categoria = <span class="tok-str">"Objeto Mecánico"</span>
+
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(self, marca, modelo, color):
+        self.marca = marca
+        self.modelo = modelo
+        self.color = color
+
+    <span class="tok-kw">def</span> <span class="tok-fn">mostrar_datos</span>(self):
+        <span class="tok-fn">print</span>(<span class="tok-str">"\n----- VEHÍCULO -----"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Marca : {self.marca}"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Modelo: {self.modelo}"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Color : {self.color}"</span>)
+
+    <span class="tok-kw">def</span> <span class="tok-fn">hacer_sonido</span>(self):
+        <span class="tok-fn">print</span>(<span class="tok-str">f"El {self.marca} {self.modelo} hace: ¡Brrmmm Brrmmm!"</span>)
+
+    @classmethod
+    <span class="tok-kw">def</span> <span class="tok-fn">mostrar_categoria</span>(cls):
+        <span class="tok-fn">print</span>(<span class="tok-str">"\nCategoría:"</span>, cls.categoria)
+
+
+<span class="tok-kw">class</span> <span class="tok-cls">Animal</span>:
+    <span class="tok-com"># Atributo de clase</span>
+    reino = <span class="tok-str">"Animal"</span>
+
+    <span class="tok-kw">def</span> <span class="tok-fn">__init__</span>(self, nombre, especie, edad):
+        self.nombre = nombre
+        self.especie = especie
+        self.edad = edad
+
+    <span class="tok-kw">def</span> <span class="tok-fn">mostrar_datos</span>(self):
+        <span class="tok-fn">print</span>(<span class="tok-str">"\n----- ANIMAL -----"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Nombre : {self.nombre}"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Especie: {self.especie}"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"Edad   : {self.edad} años"</span>)
+
+    <span class="tok-kw">def</span> <span class="tok-fn">hacer_sonido</span>(self):
+        sonidos = {
+            <span class="tok-str">"Perro"</span>: <span class="tok-str">"Guau Guau"</span>,
+            <span class="tok-str">"Gato"</span>: <span class="tok-str">"Miau"</span>,
+            <span class="tok-str">"Vaca"</span>: <span class="tok-str">"Muuu"</span>,
+            <span class="tok-str">"Pato"</span>: <span class="tok-str">"Cuac"</span>,
+            <span class="tok-str">"Caballo"</span>: <span class="tok-str">"Relincho"</span>
+        }
+
+        sonido = sonidos.get(self.especie, <span class="tok-str">"Sonido desconocido"</span>)
+        <span class="tok-fn">print</span>(<span class="tok-str">f"{self.nombre} hace: {sonido}"</span>)
+
+    @classmethod
+    <span class="tok-kw">def</span> <span class="tok-fn">mostrar_reino</span>(cls):
+        <span class="tok-fn">print</span>(<span class="tok-str">"\nReino:"</span>, cls.reino)
+
+
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"      REGISTRO DE VEHÍCULOS Y ANIMALES"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\nIngrese los datos del Vehículo 1"</span>)
+marca1 = <span class="tok-fn">input</span>(<span class="tok-str">"Marca: "</span>)
+modelo1 = <span class="tok-fn">input</span>(<span class="tok-str">"Modelo: "</span>)
+color1 = <span class="tok-fn">input</span>(<span class="tok-str">"Color: "</span>)
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\nIngrese los datos del Vehículo 2"</span>)
+marca2 = <span class="tok-fn">input</span>(<span class="tok-str">"Marca: "</span>)
+modelo2 = <span class="tok-fn">input</span>(<span class="tok-str">"Modelo: "</span>)
+color2 = <span class="tok-fn">input</span>(<span class="tok-str">"Color: "</span>)
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\nIngrese los datos del Animal 1"</span>)
+nombre1 = <span class="tok-fn">input</span>(<span class="tok-str">"Nombre: "</span>)
+especie1 = <span class="tok-fn">input</span>(<span class="tok-str">"Especie: "</span>)
+edad1 = <span class="tok-kw">int</span>(<span class="tok-fn">input</span>(<span class="tok-str">"Edad: "</span>))
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\nIngrese los datos del Animal 2"</span>)
+nombre2 = <span class="tok-fn">input</span>(<span class="tok-str">"Nombre: "</span>)
+especie2 = <span class="tok-fn">input</span>(<span class="tok-str">"Especie: "</span>)
+edad2 = <span class="tok-kw">int</span>(<span class="tok-fn">input</span>(<span class="tok-str">"Edad: "</span>))
+
+<span class="tok-com"># Instancias</span>
+vehiculo1 = <span class="tok-cls">Vehiculo</span>(marca1, modelo1, color1)
+vehiculo2 = <span class="tok-cls">Vehiculo</span>(marca2, modelo2, color2)
+
+animal1 = <span class="tok-cls">Animal</span>(nombre1, especie1, edad1)
+animal2 = <span class="tok-cls">Animal</span>(nombre2, especie2, edad2)
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\n"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"INFORMACIÓN REGISTRADA"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+
+Vehiculo.mostrar_categoria()
+
+vehiculo1.mostrar_datos()
+vehiculo1.hacer_sonido()
+
+vehiculo2.mostrar_datos()
+vehiculo2.hacer_sonido()
+
+Animal.mostrar_reino()
+
+animal1.mostrar_datos()
+animal1.hacer_sonido()
+
+animal2.mostrar_datos()
+animal2.hacer_sonido()
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\n"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"Interacción entre objetos"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+
+<span class="tok-fn">print</span>(
+    <span class="tok-str">f"El vehículo {vehiculo1.marca} {vehiculo1.modelo} "</span>
+    <span class="tok-str">f"transporta a {animal1.nombre}."</span>
+)
+
+<span class="tok-fn">print</span>(
+    <span class="tok-str">f"El vehículo {vehiculo2.marca} {vehiculo2.modelo} "</span>
+    <span class="tok-str">f"transporta a {animal2.nombre}."</span>
+)
+
+<span class="tok-fn">print</span>(<span class="tok-str">"\n"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"Programa desarrollado por:"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"Noah Leon"</span>)
+<span class="tok-fn">print</span>(<span class="tok-str">"="</span> * <span class="tok-num">50</span>)</code></pre>
+      </div>
+
+      <div class="meta-row">
+        <span class="tag">Lenguaje: <b>Python 3</b></span>
+        <span class="tag">Clases: <b>2</b></span>
+        <span class="tag">Conceptos: <b>POO · atributos de clase · classmethods</b></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  ©2026 by Iwl Productions
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  revealEls.forEach(el => io.observe(el));
+
+  // build line numbers
+  const codeBlock = document.getElementById('codeBlock');
+  const lineNumbers = document.getElementById('lineNumbers');
+  const lineCount = codeBlock.textContent.split('\n').length;
+  let numsHTML = '';
+  for (let i = 1; i <= lineCount; i++){ numsHTML += `<span>${i}</span>`; }
+  lineNumbers.innerHTML = numsHTML;
+
+  // copy button
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(codeBlock.textContent);
+      copyBtn.classList.add('copied');
+      copyBtn.querySelector('span').textContent = '¡Copiado!';
+      setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyBtn.querySelector('span').textContent = 'Copiar';
+      }, 1800);
+    }catch(e){
+      copyBtn.querySelector('span').textContent = 'Error';
+    }
+  });
+</script>
+
+</body>
+</html>
