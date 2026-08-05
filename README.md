@@ -1,2 +1,0 @@
-# slimycat-page
-idk lmao
